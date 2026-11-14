@@ -99,7 +99,20 @@ func _ready() -> void:
 
 
 static func is_mobile() -> bool:
-	return OS.has_feature("mobile") or OS.has_feature("web_android") or OS.has_feature("web_ios")
+	if OS.has_feature("mobile") or OS.has_feature("web_android") or OS.has_feature("web_ios"):
+		return true
+	# iPads can request desktop websites, so platform tags alone are insufficient.
+	if OS.has_feature("web"):
+		return bool(JavaScriptBridge.eval("navigator.maxTouchPoints > 0 && (window.matchMedia('(pointer: coarse)').matches || /Android|iPhone|iPad|iPod/.test(navigator.userAgent) || navigator.platform === 'MacIntel')"))
+	return DisplayServer.is_touchscreen_available()
+
+
+func _notification(what: int) -> void:
+	# Browsers can swallow the final touch-up when the app loses focus.
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+		for action in ["move_left", "move_right", "jump", "dash", "die"]:
+			if InputMap.has_action(action):
+				Input.action_release(action)
 
 
 static func controls_text(text: String) -> String:

@@ -2,17 +2,21 @@
 
 A 2D platformer made for the **Bounce Back** game jam. Every death leaves your body behind as a trampoline. Fall, let go, and rise.
 
-## ▶ Play in your browser (any device: Windows, Mac, iPhone, Android, Chromebook)
-**https://docc20.github.io/Corpse-Effect/**
+## Play the latest version
 
-Nothing to install. On phones and tablets the touch buttons appear automatically. Turn your phone sideways.
-Tip for phones: use your browser's "Add to Home Screen" and it opens like an app.
+- **Browser / Android / iPhone / iPad:** [Play here](https://docc20.github.io/Corpse-Effect/). Touch controls appear automatically. Play with the phone sideways.
+- **macOS (Intel and Apple Silicon):** download `CorpseAndEffect-macOS.zip` from [the latest release](https://github.com/DocC20/Corpse-Effect/releases/latest), extract it and open `Corpse & Effect.app`.
+- **Windows:** download `CorpseAndEffect-Windows.zip` from [the latest release](https://github.com/DocC20/Corpse-Effect/releases/latest), extract it and run `CorpseAndEffect.exe`.
 
-## ⬇ Download for Windows
-1. Open the **Play** folder above, then **CorpseAndEffect-Windows.zip**, and click the **Download** button (arrow, top right).
-2. Right-click the downloaded file → **Extract All**.
-3. Double-click **CorpseAndEffect.exe**.
-4. If Windows says "Windows protected your PC", click **More info → Run anyway**.
+The Mac build is ad-hoc signed, but is not Apple notarized. If macOS blocks the downloaded app, review it and use **System Settings → Privacy & Security → Open Anyway**.
+
+## Install on your phone
+
+Open the browser game in its own tab. Android: use **Install / Offline** or the browser's **Install app** menu. iPhone/iPad: open in Safari, then **Share → Add to Home Screen**. Load the game once online before playing offline. The mobile version is an installable Web app; it is not an APK or App Store IPA.
+
+## Upload to itch.io
+
+Upload `CorpseAndEffect-Web.zip` from the latest release as an HTML game, tick **This file will be played in the browser**, enable **Mobile friendly** and the fullscreen button, and use a 1280 × 720 viewport. `index.html` is at the ZIP root. Add the Mac and Windows ZIPs as separate downloadable files and select their matching operating systems.
 
 ## Controls
 - A / D or arrows: move
@@ -29,6 +33,8 @@ Tip for phones: use your browser's "Add to Home Screen" and it opens like an app
 - Nita David: sound design, level design
 
 ## Repository layout
-- `Play/` ready-to-play Windows build
+- `Play/` ready-to-play Windows and Mac builds
 - `docs/` the browser version (served by GitHub Pages)
-- everything else: the full Godot 4.7 project (open `project.godot` in Godot 4.7). Asset credits are in `CREDITS.md`.
+- the full Godot 4.7.2 project (open `project.godot` to edit it)
+
+Asset credits are in `CREDITS.md`, and build instructions are in `PLATFORMS.md`.

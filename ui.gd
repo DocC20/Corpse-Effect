@@ -63,6 +63,7 @@ static func is_mobile() -> bool:
 
 
 func _rebuild_touch() -> void:
+	_release_touch_actions()
 	if touch_layer:
 		touch_layer.queue_free()
 		touch_layer = null
@@ -85,9 +86,10 @@ func _build_touch() -> void:
 		b.texture_normal = BUTTON
 		b.action = spec[0]
 		b.visibility_mode = TouchScreenButton.VISIBILITY_ALWAYS
+		b.passby_press = true
 		b.position = spec[2]
 		b.scale = Vector2.ONE * spec[3]
-		b.modulate = Color(1, 1, 1, 0.45)
+		b.modulate = Color(1, 1, 1, 0.7)
 		var shape := RectangleShape2D.new()
 		shape.size = Vector2(48, 48)
 		b.shape = shape
@@ -99,11 +101,18 @@ func _build_touch() -> void:
 		ls.font_color = Color(0.3, 0.2, 0.1)
 		l.label_settings = ls
 		l.text = spec[1]
+		l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		l.size = Vector2(48, 48)
 		b.add_child(l)
 		touch_layer.add_child(b)
+
+
+func _release_touch_actions() -> void:
+	for action in ["move_left", "move_right", "jump", "dash", "die"]:
+		if InputMap.has_action(action):
+			Input.action_release(action)
 
 
 func fade_out() -> void:
@@ -185,6 +194,7 @@ static func make_button(text: String, d: float, font: Font) -> Button:
 
 
 func _open_pause() -> void:
+	_release_touch_actions()
 	var atm := get_tree().get_first_node_in_group("atmosphere")
 	dread = atm.dread() if atm and atm.has_method("dread") else 0.0
 	if pause_layer:
