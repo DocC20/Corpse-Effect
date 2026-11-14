@@ -1,0 +1,439 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://character_body_2d.gd" id="1_ply"]
+[ext_resource type="Texture2D" path="res://wanderer_32x32.png" id="2_tex"]
+[ext_resource type="Script" path="res://spikes.gd" id="3_spk"]
+[ext_resource type="Script" path="res://goal.gd" id="4_goal"]
+[ext_resource type="Script" path="res://checkpoint.gd" id="5_chk"]
+[ext_resource type="Script" path="res://prompt.gd" id="6_prm"]
+[ext_resource type="Script" path="res://ui.gd" id="7_ui"]
+[ext_resource type="Script" path="res://atmosphere.gd" id="8_atm"]
+[ext_resource type="Script" path="res://camera_follow.gd" id="9_cam"]
+
+[sub_resource type="RectangleShape2D" id="S_CeilingTop"]
+size = Vector2(640, 30)
+
+[sub_resource type="RectangleShape2D" id="S_EntryA"]
+size = Vector2(80, 40)
+
+[sub_resource type="RectangleShape2D" id="S_Pit1"]
+size = Vector2(70, 20)
+
+[sub_resource type="RectangleShape2D" id="A_Spikes1"]
+size = Vector2(70, 14)
+
+[sub_resource type="RectangleShape2D" id="S_LedgeB"]
+size = Vector2(80, 40)
+
+[sub_resource type="RectangleShape2D" id="S_WallC"]
+size = Vector2(100, 122)
+
+[sub_resource type="RectangleShape2D" id="S_PitFloor2"]
+size = Vector2(140, 20)
+
+[sub_resource type="RectangleShape2D" id="A_Spikes2"]
+size = Vector2(140, 14)
+
+[sub_resource type="RectangleShape2D" id="S_IslandE"]
+size = Vector2(60, 70)
+
+[sub_resource type="RectangleShape2D" id="S_PitFloor3"]
+size = Vector2(30, 20)
+
+[sub_resource type="RectangleShape2D" id="A_Spikes3"]
+size = Vector2(30, 14)
+
+[sub_resource type="RectangleShape2D" id="S_SummitF"]
+size = Vector2(80, 130)
+
+[sub_resource type="RectangleShape2D" id="C_CheckpointB"]
+size = Vector2(10, 20)
+
+[sub_resource type="RectangleShape2D" id="C_CheckpointC"]
+size = Vector2(10, 20)
+
+[sub_resource type="RectangleShape2D" id="C_CheckpointE"]
+size = Vector2(10, 20)
+
+[sub_resource type="RectangleShape2D" id="S_player"]
+size = Vector2(12, 17)
+
+[sub_resource type="RectangleShape2D" id="S_goal"]
+size = Vector2(12, 24)
+
+[sub_resource type="RectangleShape2D" id="S_WallLeft"]
+size = Vector2(10, 220)
+
+[sub_resource type="RectangleShape2D" id="S_WallRight"]
+size = Vector2(10, 220)
+
+[sub_resource type="RectangleShape2D" id="Z_Deep"]
+size = Vector2(80, 40)
+
+[sub_resource type="RectangleShape2D" id="Z_Stack"]
+size = Vector2(60, 40)
+
+[sub_resource type="RectangleShape2D" id="Z_Leap"]
+size = Vector2(60, 30)
+
+[sub_resource type="RectangleShape2D" id="Z_Last"]
+size = Vector2(60, 30)
+
+[sub_resource type="RectangleShape2D" id="Z_End"]
+size = Vector2(60, 30)
+
+[node name="Level5" type="Node2D"]
+
+[node name="CeilingTop" type="StaticBody2D" parent="."]
+position = Vector2(320, -5)
+
+[node name="ColorRect" type="ColorRect" parent="CeilingTop"]
+offset_left = -320
+offset_top = -15
+offset_right = 320
+offset_bottom = 15
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CeilingTop"]
+shape = SubResource("S_CeilingTop")
+
+[node name="EntryA" type="StaticBody2D" parent="."]
+position = Vector2(40, 160)
+
+[node name="ColorRect" type="ColorRect" parent="EntryA"]
+offset_left = -40
+offset_top = -20
+offset_right = 40
+offset_bottom = 20
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EntryA"]
+shape = SubResource("S_EntryA")
+
+[node name="Pit1" type="StaticBody2D" parent="."]
+position = Vector2(115, 170)
+
+[node name="ColorRect" type="ColorRect" parent="Pit1"]
+offset_left = -35
+offset_top = -10
+offset_right = 35
+offset_bottom = 10
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Pit1"]
+shape = SubResource("S_Pit1")
+
+[node name="SpikeVisual1" type="Polygon2D" parent="."]
+color = Color(0.85, 0.28, 0.35, 1)
+polygon = PackedVector2Array(80, 170, 80, 168, 85, 160, 90, 168, 95, 160, 100, 168, 105, 160, 110, 168, 115, 160, 120, 168, 125, 160, 130, 168, 135, 160, 140, 168, 145, 160, 150, 168, 150, 170)
+
+[node name="Spikes1" type="Area2D" parent="."]
+position = Vector2(115, 163)
+script = ExtResource("3_spk")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Spikes1"]
+shape = SubResource("A_Spikes1")
+
+[node name="LedgeB" type="StaticBody2D" parent="."]
+position = Vector2(190, 160)
+
+[node name="ColorRect" type="ColorRect" parent="LedgeB"]
+offset_left = -40
+offset_top = -20
+offset_right = 40
+offset_bottom = 20
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LedgeB"]
+shape = SubResource("S_LedgeB")
+
+[node name="WallC" type="StaticBody2D" parent="."]
+position = Vector2(280, 119)
+
+[node name="ColorRect" type="ColorRect" parent="WallC"]
+offset_left = -50
+offset_top = -61
+offset_right = 50
+offset_bottom = 61
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallC"]
+shape = SubResource("S_WallC")
+
+[node name="PitFloor2" type="StaticBody2D" parent="."]
+position = Vector2(400, 170)
+
+[node name="ColorRect" type="ColorRect" parent="PitFloor2"]
+offset_left = -70
+offset_top = -10
+offset_right = 70
+offset_bottom = 10
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PitFloor2"]
+shape = SubResource("S_PitFloor2")
+
+[node name="SpikeVisual2" type="Polygon2D" parent="."]
+color = Color(0.85, 0.28, 0.35, 1)
+polygon = PackedVector2Array(330, 170, 330, 168, 335, 160, 340, 168, 345, 160, 350, 168, 355, 160, 360, 168, 365, 160, 370, 168, 375, 160, 380, 168, 385, 160, 390, 168, 395, 160, 400, 168, 405, 160, 410, 168, 415, 160, 420, 168, 425, 160, 430, 168, 435, 160, 440, 168, 445, 160, 450, 168, 455, 160, 460, 168, 465, 160, 470, 168, 470, 170)
+
+[node name="Spikes2" type="Area2D" parent="."]
+position = Vector2(400, 163)
+script = ExtResource("3_spk")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Spikes2"]
+shape = SubResource("A_Spikes2")
+
+[node name="IslandE" type="StaticBody2D" parent="."]
+position = Vector2(500, 145)
+
+[node name="ColorRect" type="ColorRect" parent="IslandE"]
+offset_left = -30
+offset_top = -35
+offset_right = 30
+offset_bottom = 35
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="IslandE"]
+shape = SubResource("S_IslandE")
+
+[node name="PitFloor3" type="StaticBody2D" parent="."]
+position = Vector2(545, 170)
+
+[node name="ColorRect" type="ColorRect" parent="PitFloor3"]
+offset_left = -15
+offset_top = -10
+offset_right = 15
+offset_bottom = 10
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PitFloor3"]
+shape = SubResource("S_PitFloor3")
+
+[node name="SpikeVisual3" type="Polygon2D" parent="."]
+color = Color(0.85, 0.28, 0.35, 1)
+polygon = PackedVector2Array(530, 170, 530, 168, 535, 160, 540, 168, 545, 160, 550, 168, 555, 160, 560, 168, 560, 170)
+
+[node name="Spikes3" type="Area2D" parent="."]
+position = Vector2(545, 163)
+script = ExtResource("3_spk")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Spikes3"]
+shape = SubResource("A_Spikes3")
+
+[node name="SummitF" type="StaticBody2D" parent="."]
+position = Vector2(600, 115)
+
+[node name="ColorRect" type="ColorRect" parent="SummitF"]
+offset_left = -40
+offset_top = -65
+offset_right = 40
+offset_bottom = 65
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SummitF"]
+shape = SubResource("S_SummitF")
+
+[node name="CheckpointB" type="Area2D" parent="."]
+position = Vector2(166, 124)
+script = ExtResource("5_chk")
+
+[node name="ColorRect" type="ColorRect" parent="CheckpointB"]
+offset_left = -2.0
+offset_top = 10.0
+offset_right = 2.0
+offset_bottom = 16.0
+color = Color(0.3, 0.4, 0.55, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CheckpointB"]
+position = Vector2(0, 6)
+shape = SubResource("C_CheckpointB")
+
+[node name="CheckpointC" type="Area2D" parent="."]
+position = Vector2(246, 42)
+script = ExtResource("5_chk")
+
+[node name="ColorRect" type="ColorRect" parent="CheckpointC"]
+offset_left = -2.0
+offset_top = 10.0
+offset_right = 2.0
+offset_bottom = 16.0
+color = Color(0.3, 0.4, 0.55, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CheckpointC"]
+position = Vector2(0, 6)
+shape = SubResource("C_CheckpointC")
+
+[node name="CheckpointE" type="Area2D" parent="."]
+position = Vector2(482, 94)
+script = ExtResource("5_chk")
+
+[node name="ColorRect" type="ColorRect" parent="CheckpointE"]
+offset_left = -2.0
+offset_top = 10.0
+offset_right = 2.0
+offset_bottom = 16.0
+color = Color(0.3, 0.4, 0.55, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CheckpointE"]
+position = Vector2(0, 6)
+shape = SubResource("C_CheckpointE")
+
+[node name="WallLeft" type="StaticBody2D" parent="."]
+position = Vector2(-5, 90)
+
+[node name="ColorRect" type="ColorRect" parent="WallLeft"]
+offset_left = -5
+offset_top = -110
+offset_right = 5
+offset_bottom = 110
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallLeft"]
+shape = SubResource("S_WallLeft")
+
+[node name="WallRight" type="StaticBody2D" parent="."]
+position = Vector2(645, 90)
+
+[node name="ColorRect" type="ColorRect" parent="WallRight"]
+offset_left = -5
+offset_top = -110
+offset_right = 5
+offset_bottom = 110
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallRight"]
+shape = SubResource("S_WallRight")
+
+[node name="Goal" type="Area2D" parent="."]
+position = Vector2(620, 38)
+script = ExtResource("4_goal")
+next_scene = ""
+final = true
+
+[node name="Pole" type="ColorRect" parent="Goal"]
+offset_left = -1.0
+offset_top = -12.0
+offset_right = 1.0
+offset_bottom = 12.0
+color = Color(0.9, 0.9, 0.95, 1)
+
+[node name="Flag" type="ColorRect" parent="Goal"]
+offset_left = 1.0
+offset_top = -12.0
+offset_right = 11.0
+offset_bottom = -5.0
+color = Color(1, 0.83, 0.3, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Goal"]
+shape = SubResource("S_goal")
+
+[node name="CharacterBody2D" type="CharacterBody2D" parent="."]
+position = Vector2(20, 124)
+script = ExtResource("1_ply")
+
+[node name="Sprite2D" type="Sprite2D" parent="CharacterBody2D"]
+texture = ExtResource("2_tex")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CharacterBody2D"]
+position = Vector2(0, 7.5)
+shape = SubResource("S_player")
+
+[node name="Atmosphere" type="Node2D" parent="."]
+script = ExtResource("8_atm")
+progress_from = 20.0
+progress_to = 620.0
+level_size = Vector2(640, 180)
+ground_style = "cave"
+mood_start = 0.8
+mood_end = 0.9
+realism = 0.14
+fx = 1.0
+level_number = 5
+
+[node name="TextLayer" type="CanvasLayer" parent="." groups=["text_layer"]]
+layer = 3
+follow_viewport_enabled = true
+
+[node name="HUD" type="CanvasLayer" parent="."]
+layer = 4
+
+[node name="Prompts" type="Node2D" parent="."]
+
+[node name="Deep" type="Area2D" parent="Prompts"]
+position = Vector2(40, 120)
+script = ExtResource("6_prm")
+text = "The deep remembers every fall."
+label_pos = Vector2(80, 64)
+dismiss_x = 150.0
+italic = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Prompts/Deep"]
+shape = SubResource("Z_Deep")
+
+[node name="Stack" type="Area2D" parent="Prompts"]
+position = Vector2(200, 120)
+script = ExtResource("6_prm")
+text = "One of you is not enough."
+label_pos = Vector2(190, 84)
+dismiss_x = 235.0
+italic = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Prompts/Stack"]
+shape = SubResource("Z_Stack")
+
+[node name="Leap" type="Area2D" parent="Prompts"]
+position = Vector2(280, 40)
+script = ExtResource("6_prm")
+text = "Leap.\nTrust what you leave behind."
+label_pos = Vector2(330, 22)
+dismiss_x = 470.0
+italic = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Prompts/Leap"]
+shape = SubResource("Z_Leap")
+
+[node name="Last" type="Area2D" parent="Prompts"]
+position = Vector2(500, 92)
+script = ExtResource("6_prm")
+text = "Once more. Higher."
+label_pos = Vector2(500, 66)
+dismiss_x = 562.0
+italic = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Prompts/Last"]
+shape = SubResource("Z_Last")
+
+[node name="End" type="Area2D" parent="Prompts"]
+position = Vector2(610, 30)
+script = ExtResource("6_prm")
+text = "Something stirs below."
+label_pos = Vector2(600, 24)
+dismiss_x = -1.0
+italic = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Prompts/End"]
+shape = SubResource("Z_End")
+
+[node name="UI" type="Node" parent="."]
+script = ExtResource("7_ui")
+
+[node name="Camera" type="Camera2D" parent="."]
+position = Vector2(160, 90)
+script = ExtResource("9_cam")
+bounds = Rect2(0, 0, 640, 180)
+
+[node name="DeathLabel" type="Label" parent="HUD" groups=["death_label"]]
+offset_left = 240.0
+offset_top = 4.0
+offset_right = 316.0
+offset_bottom = 16.0
+horizontal_alignment = 2
+text = "DEATHS: 0"
+
+[node name="MsgLabel" type="Label" parent="HUD" groups=["msg_label"]]
+offset_left = 40.0
+offset_top = 34.0
+offset_right = 280.0
+offset_bottom = 74.0
+horizontal_alignment = 1

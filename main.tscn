@@ -1,0 +1,270 @@
+[gd_scene format=3 uid="uid://drl1g5qdwu3ln"]
+
+[ext_resource type="Script" uid="uid://dgd2g10s4ae7q" path="res://character_body_2d.gd" id="1_0xm2m"]
+[ext_resource type="Texture2D" uid="uid://b0jriebpovvci" path="res://wanderer_32x32.png" id="2_h2yge"]
+[ext_resource type="Script" path="res://spikes.gd" id="3_spk"]
+[ext_resource type="Script" path="res://goal.gd" id="4_goal"]
+[ext_resource type="Script" path="res://checkpoint.gd" id="5_chk"]
+[ext_resource type="Script" path="res://prompt.gd" id="6_prm"]
+[ext_resource type="Script" path="res://ui.gd" id="7_ui"]
+[ext_resource type="Script" path="res://atmosphere.gd" id="8_atm"]
+
+[sub_resource type="RectangleShape2D" id="S_ground1"]
+size = Vector2(90, 40)
+
+[sub_resource type="RectangleShape2D" id="S_pit"]
+size = Vector2(100, 20)
+
+[sub_resource type="RectangleShape2D" id="S_ground2"]
+size = Vector2(60, 40)
+
+[sub_resource type="RectangleShape2D" id="S_ledge"]
+size = Vector2(70, 100)
+
+[sub_resource type="RectangleShape2D" id="S_wall"]
+size = Vector2(10, 200)
+
+[sub_resource type="RectangleShape2D" id="S_spikes"]
+size = Vector2(100, 14)
+
+[sub_resource type="RectangleShape2D" id="S_goal"]
+size = Vector2(12, 24)
+
+[sub_resource type="RectangleShape2D" id="S_check"]
+size = Vector2(10, 20)
+
+[sub_resource type="RectangleShape2D" id="S_player"]
+size = Vector2(12, 17)
+
+[sub_resource type="RectangleShape2D" id="Z_start"]
+size = Vector2(90, 60)
+
+[sub_resource type="RectangleShape2D" id="Z_pit"]
+size = Vector2(60, 60)
+
+[sub_resource type="RectangleShape2D" id="Z_wall"]
+size = Vector2(60, 60)
+
+[sub_resource type="RectangleShape2D" id="Z_top"]
+size = Vector2(70, 40)
+
+[node name="Node2D" type="Node2D" unique_id=1207776240]
+
+[node name="Background" type="ColorRect" parent="."]
+offset_right = 320.0
+offset_bottom = 180.0
+color = Color(0.08, 0.1, 0.18, 1)
+
+[node name="Ground1" type="StaticBody2D" parent="."]
+position = Vector2(45, 160)
+
+[node name="ColorRect" type="ColorRect" parent="Ground1"]
+offset_left = -45.0
+offset_top = -20.0
+offset_right = 45.0
+offset_bottom = 20.0
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground1"]
+shape = SubResource("S_ground1")
+
+[node name="PitFloor" type="StaticBody2D" parent="."]
+position = Vector2(140, 170)
+
+[node name="ColorRect" type="ColorRect" parent="PitFloor"]
+offset_left = -50
+offset_top = -2
+offset_right = 50
+offset_bottom = 10
+color = Color(0.06, 0.07, 0.12, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PitFloor"]
+shape = SubResource("S_pit")
+
+[node name="Ground2" type="StaticBody2D" parent="."]
+position = Vector2(220, 160)
+
+[node name="ColorRect" type="ColorRect" parent="Ground2"]
+offset_left = -30.0
+offset_top = -20.0
+offset_right = 30.0
+offset_bottom = 20.0
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground2"]
+shape = SubResource("S_ground2")
+
+[node name="Ledge" type="StaticBody2D" parent="."]
+position = Vector2(285, 130)
+
+[node name="ColorRect" type="ColorRect" parent="Ledge"]
+offset_left = -35.0
+offset_top = -50.0
+offset_right = 35.0
+offset_bottom = 50.0
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ledge"]
+shape = SubResource("S_ledge")
+
+[node name="WallLeft" type="StaticBody2D" parent="."]
+position = Vector2(-5, 90)
+
+[node name="ColorRect" type="ColorRect" parent="WallLeft"]
+offset_left = -5.0
+offset_top = -100.0
+offset_right = 5.0
+offset_bottom = 100.0
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallLeft"]
+shape = SubResource("S_wall")
+
+[node name="WallRight" type="StaticBody2D" parent="."]
+position = Vector2(325, 90)
+
+[node name="ColorRect" type="ColorRect" parent="WallRight"]
+offset_left = -5.0
+offset_top = -100.0
+offset_right = 5.0
+offset_bottom = 100.0
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallRight"]
+shape = SubResource("S_wall")
+
+[node name="SpikeVisual" type="Polygon2D" parent="."]
+color = Color(0.85, 0.28, 0.35, 1)
+polygon = PackedVector2Array(90, 170, 90, 168, 95, 160, 100, 168, 105, 160, 110, 168, 115, 160, 120, 168, 125, 160, 130, 168, 135, 160, 140, 168, 145, 160, 150, 168, 155, 160, 160, 168, 165, 160, 170, 168, 175, 160, 180, 168, 185, 160, 190, 168, 190, 170)
+
+[node name="Spikes" type="Area2D" parent="."]
+position = Vector2(140, 163)
+script = ExtResource("3_spk")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Spikes"]
+shape = SubResource("S_spikes")
+
+[node name="Checkpoint" type="Area2D" parent="."]
+position = Vector2(205, 124)
+script = ExtResource("5_chk")
+
+[node name="ColorRect" type="ColorRect" parent="Checkpoint"]
+offset_left = -2.0
+offset_top = 10.0
+offset_right = 2.0
+offset_bottom = 16.0
+color = Color(0.3, 0.4, 0.55, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Checkpoint"]
+position = Vector2(0, 6)
+shape = SubResource("S_check")
+
+[node name="Goal" type="Area2D" parent="."]
+position = Vector2(300, 68)
+script = ExtResource("4_goal")
+next_scene = "res://level2.tscn"
+
+[node name="Pole" type="ColorRect" parent="Goal"]
+offset_left = -1.0
+offset_top = -12.0
+offset_right = 1.0
+offset_bottom = 12.0
+color = Color(0.9, 0.9, 0.95, 1)
+
+[node name="Flag" type="ColorRect" parent="Goal"]
+offset_left = 1.0
+offset_top = -12.0
+offset_right = 11.0
+offset_bottom = -5.0
+color = Color(1, 0.83, 0.3, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Goal"]
+shape = SubResource("S_goal")
+
+[node name="CharacterBody2D" type="CharacterBody2D" parent="." unique_id=57417674]
+position = Vector2(30, 124)
+script = ExtResource("1_0xm2m")
+
+[node name="Sprite2D" type="Sprite2D" parent="CharacterBody2D" unique_id=1264361141]
+texture = ExtResource("2_h2yge")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CharacterBody2D"]
+position = Vector2(0, 7.5)
+shape = SubResource("S_player")
+
+[node name="Atmosphere" type="Node2D" parent="."]
+script = ExtResource("8_atm")
+mood_start = 0.0
+mood_end = 0.03
+ground_style = "plains"
+realism = 0.0
+fx = 0.4
+level_number = 1
+
+[node name="TextLayer" type="CanvasLayer" parent="." groups=["text_layer"]]
+layer = 3
+follow_viewport_enabled = true
+
+[node name="Prompts" type="Node2D" parent="."]
+
+[node name="Move" type="Area2D" parent="Prompts"]
+position = Vector2(45, 110)
+script = ExtResource("6_prm")
+dismiss_x = 100.0
+text = "A / D   move        W   jump"
+label_pos = Vector2(60, 62)
+italic = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Prompts/Move"]
+shape = SubResource("Z_start")
+
+[node name="Gap" type="Area2D" parent="Prompts"]
+position = Vector2(85, 110)
+script = ExtResource("6_prm")
+alt_text = "What you leave behind\ncan lift you up."
+dismiss_x = 195.0
+text = "The gap is too wide.\nFall anyway."
+label_pos = Vector2(140, 88)
+italic = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Prompts/Gap"]
+shape = SubResource("Z_pit")
+
+[node name="Wall" type="Area2D" parent="Prompts"]
+position = Vector2(220, 110)
+script = ExtResource("6_prm")
+dismiss_x = 255.0
+text = "Too high to climb?\nPress R. Let go, and rise."
+label_pos = Vector2(205, 62)
+italic = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Prompts/Wall"]
+shape = SubResource("Z_wall")
+
+[node name="Top" type="Area2D" parent="Prompts"]
+position = Vector2(285, 60)
+script = ExtResource("6_prm")
+text = "Every fall is a step up."
+label_pos = Vector2(270, 26)
+italic = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Prompts/Top"]
+shape = SubResource("Z_top")
+
+[node name="UI" type="Node" parent="."]
+script = ExtResource("7_ui")
+
+[node name="DeathLabel" type="Label" parent="TextLayer" groups=["death_label"]]
+offset_left = 240.0
+offset_top = 4.0
+offset_right = 316.0
+offset_bottom = 16.0
+horizontal_alignment = 2
+text = "DEATHS: 0"
+
+[node name="MsgLabel" type="Label" parent="TextLayer" groups=["msg_label"]]
+offset_left = 40.0
+offset_top = 34.0
+offset_right = 280.0
+offset_bottom = 74.0
+horizontal_alignment = 1

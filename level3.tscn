@@ -1,0 +1,380 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://character_body_2d.gd" id="1_ply"]
+[ext_resource type="Texture2D" path="res://wanderer_32x32.png" id="2_tex"]
+[ext_resource type="Script" path="res://spikes.gd" id="3_spk"]
+[ext_resource type="Script" path="res://goal.gd" id="4_goal"]
+[ext_resource type="Script" path="res://checkpoint.gd" id="5_chk"]
+[ext_resource type="Script" path="res://prompt.gd" id="6_prm"]
+[ext_resource type="Script" path="res://ui.gd" id="7_ui"]
+[ext_resource type="Script" path="res://atmosphere.gd" id="8_atm"]
+[ext_resource type="Script" path="res://camera_follow.gd" id="9_cam"]
+
+[sub_resource type="RectangleShape2D" id="S_GroundA"]
+size = Vector2(70, 30)
+
+[sub_resource type="RectangleShape2D" id="S_StepB"]
+size = Vector2(50, 56)
+
+[sub_resource type="RectangleShape2D" id="S_PitFloor1"]
+size = Vector2(80, 20)
+
+[sub_resource type="RectangleShape2D" id="S_LedgeC"]
+size = Vector2(60, 70)
+
+[sub_resource type="RectangleShape2D" id="S_CliffD"]
+size = Vector2(100, 130)
+
+[sub_resource type="RectangleShape2D" id="S_PitFloor2"]
+size = Vector2(160, 20)
+
+[sub_resource type="RectangleShape2D" id="S_LedgeF"]
+size = Vector2(60, 60)
+
+[sub_resource type="RectangleShape2D" id="S_SummitG"]
+size = Vector2(60, 84)
+
+[sub_resource type="RectangleShape2D" id="S_WallLeft"]
+size = Vector2(10, 200)
+
+[sub_resource type="RectangleShape2D" id="S_WallRight"]
+size = Vector2(10, 200)
+
+[sub_resource type="RectangleShape2D" id="S_spk1"]
+size = Vector2(80, 14)
+
+[sub_resource type="RectangleShape2D" id="S_spk2"]
+size = Vector2(160, 14)
+
+[sub_resource type="RectangleShape2D" id="S_goal"]
+size = Vector2(12, 24)
+
+[sub_resource type="RectangleShape2D" id="S_check"]
+size = Vector2(10, 20)
+
+[sub_resource type="RectangleShape2D" id="S_player"]
+size = Vector2(12, 17)
+
+[sub_resource type="RectangleShape2D" id="Z_climb"]
+size = Vector2(80, 40)
+
+[sub_resource type="RectangleShape2D" id="Z_stair"]
+size = Vector2(60, 40)
+
+[sub_resource type="RectangleShape2D" id="Z_dark"]
+size = Vector2(60, 40)
+
+[sub_resource type="RectangleShape2D" id="Z_end"]
+size = Vector2(60, 40)
+
+[node name="Level3" type="Node2D"]
+
+[node name="Background" type="ColorRect" parent="."]
+offset_right = 640.0
+offset_bottom = 180.0
+color = Color(0.08, 0.1, 0.18, 1)
+
+[node name="GroundA" type="StaticBody2D" parent="."]
+position = Vector2(35, 165)
+
+[node name="ColorRect" type="ColorRect" parent="GroundA"]
+offset_left = -35.0
+offset_top = -15.0
+offset_right = 35.0
+offset_bottom = 15.0
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GroundA"]
+shape = SubResource("S_GroundA")
+
+[node name="StepB" type="StaticBody2D" parent="."]
+position = Vector2(95, 152)
+
+[node name="ColorRect" type="ColorRect" parent="StepB"]
+offset_left = -25.0
+offset_top = -28.0
+offset_right = 25.0
+offset_bottom = 28.0
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StepB"]
+shape = SubResource("S_StepB")
+
+[node name="PitFloor1" type="StaticBody2D" parent="."]
+position = Vector2(160, 170)
+
+[node name="ColorRect" type="ColorRect" parent="PitFloor1"]
+offset_left = -40.0
+offset_top = -2.0
+offset_right = 40.0
+offset_bottom = 10.0
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PitFloor1"]
+shape = SubResource("S_PitFloor1")
+
+[node name="LedgeC" type="StaticBody2D" parent="."]
+position = Vector2(230, 145)
+
+[node name="ColorRect" type="ColorRect" parent="LedgeC"]
+offset_left = -30.0
+offset_top = -35.0
+offset_right = 30.0
+offset_bottom = 35.0
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LedgeC"]
+shape = SubResource("S_LedgeC")
+
+[node name="CliffD" type="StaticBody2D" parent="."]
+position = Vector2(310, 115)
+
+[node name="ColorRect" type="ColorRect" parent="CliffD"]
+offset_left = -50.0
+offset_top = -65.0
+offset_right = 50.0
+offset_bottom = 65.0
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CliffD"]
+shape = SubResource("S_CliffD")
+
+[node name="PitFloor2" type="StaticBody2D" parent="."]
+position = Vector2(440, 170)
+
+[node name="ColorRect" type="ColorRect" parent="PitFloor2"]
+offset_left = -80.0
+offset_top = -2.0
+offset_right = 80.0
+offset_bottom = 10.0
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PitFloor2"]
+shape = SubResource("S_PitFloor2")
+
+[node name="LedgeF" type="StaticBody2D" parent="."]
+position = Vector2(550, 150)
+
+[node name="ColorRect" type="ColorRect" parent="LedgeF"]
+offset_left = -30.0
+offset_top = -30.0
+offset_right = 30.0
+offset_bottom = 30.0
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LedgeF"]
+shape = SubResource("S_LedgeF")
+
+[node name="SummitG" type="StaticBody2D" parent="."]
+position = Vector2(610, 138)
+
+[node name="ColorRect" type="ColorRect" parent="SummitG"]
+offset_left = -30.0
+offset_top = -42.0
+offset_right = 30.0
+offset_bottom = 42.0
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SummitG"]
+shape = SubResource("S_SummitG")
+
+[node name="WallLeft" type="StaticBody2D" parent="."]
+position = Vector2(-5, 90)
+
+[node name="ColorRect" type="ColorRect" parent="WallLeft"]
+offset_left = -5.0
+offset_top = -100.0
+offset_right = 5.0
+offset_bottom = 100.0
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallLeft"]
+shape = SubResource("S_WallLeft")
+
+[node name="WallRight" type="StaticBody2D" parent="."]
+position = Vector2(645, 90)
+
+[node name="ColorRect" type="ColorRect" parent="WallRight"]
+offset_left = -5.0
+offset_top = -100.0
+offset_right = 5.0
+offset_bottom = 100.0
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallRight"]
+shape = SubResource("S_WallRight")
+
+[node name="SpikeVisual1" type="Polygon2D" parent="."]
+color = Color(0.85, 0.28, 0.35, 1)
+polygon = PackedVector2Array(120, 170, 120, 168, 125, 160, 130, 168, 135, 160, 140, 168, 145, 160, 150, 168, 155, 160, 160, 168, 165, 160, 170, 168, 175, 160, 180, 168, 185, 160, 190, 168, 195, 160, 200, 168, 200, 170)
+
+[node name="SpikeVisual2" type="Polygon2D" parent="."]
+color = Color(0.85, 0.28, 0.35, 1)
+polygon = PackedVector2Array(360, 170, 360, 168, 365, 160, 370, 168, 375, 160, 380, 168, 385, 160, 390, 168, 395, 160, 400, 168, 405, 160, 410, 168, 415, 160, 420, 168, 425, 160, 430, 168, 435, 160, 440, 168, 445, 160, 450, 168, 455, 160, 460, 168, 465, 160, 470, 168, 475, 160, 480, 168, 485, 160, 490, 168, 495, 160, 500, 168, 505, 160, 510, 168, 515, 160, 520, 168, 520, 170)
+
+[node name="Spikes1" type="Area2D" parent="."]
+position = Vector2(160, 163)
+script = ExtResource("3_spk")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Spikes1"]
+shape = SubResource("S_spk1")
+
+[node name="Spikes2" type="Area2D" parent="."]
+position = Vector2(440, 163)
+script = ExtResource("3_spk")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Spikes2"]
+shape = SubResource("S_spk2")
+
+[node name="CheckpointC" type="Area2D" parent="."]
+position = Vector2(212, 94)
+script = ExtResource("5_chk")
+
+[node name="ColorRect" type="ColorRect" parent="CheckpointC"]
+offset_left = -2.0
+offset_top = 10.0
+offset_right = 2.0
+offset_bottom = 16.0
+color = Color(0.3, 0.4, 0.55, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CheckpointC"]
+position = Vector2(0, 6)
+shape = SubResource("S_check")
+
+[node name="CheckpointD" type="Area2D" parent="."]
+position = Vector2(296, 34)
+script = ExtResource("5_chk")
+
+[node name="ColorRect" type="ColorRect" parent="CheckpointD"]
+offset_left = -2.0
+offset_top = 10.0
+offset_right = 2.0
+offset_bottom = 16.0
+color = Color(0.3, 0.4, 0.55, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CheckpointD"]
+position = Vector2(0, 6)
+shape = SubResource("S_check")
+
+[node name="Goal" type="Area2D" parent="."]
+position = Vector2(622, 84)
+script = ExtResource("4_goal")
+next_scene = "res://level4.tscn"
+
+[node name="Pole" type="ColorRect" parent="Goal"]
+offset_left = -1.0
+offset_top = -12.0
+offset_right = 1.0
+offset_bottom = 12.0
+color = Color(0.9, 0.9, 0.95, 1)
+
+[node name="Flag" type="ColorRect" parent="Goal"]
+offset_left = 1.0
+offset_top = -12.0
+offset_right = 11.0
+offset_bottom = -5.0
+color = Color(1, 0.83, 0.3, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Goal"]
+shape = SubResource("S_goal")
+
+[node name="CharacterBody2D" type="CharacterBody2D" parent="."]
+position = Vector2(24, 134)
+script = ExtResource("1_ply")
+
+[node name="Sprite2D" type="Sprite2D" parent="CharacterBody2D"]
+texture = ExtResource("2_tex")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CharacterBody2D"]
+position = Vector2(0, 7.5)
+shape = SubResource("S_player")
+
+[node name="Atmosphere" type="Node2D" parent="."]
+script = ExtResource("8_atm")
+progress_from = 20.0
+progress_to = 620.0
+level_size = Vector2(640, 180)
+night_at_x = 330.0
+night_message = "Night falls."
+mood_start = 0.1
+mood_end = 0.2
+ground_style = "highland"
+realism = 0.06
+fx = 0.7
+level_number = 3
+night_mood = 0.7
+
+[node name="TextLayer" type="CanvasLayer" parent="." groups=["text_layer"]]
+layer = 3
+follow_viewport_enabled = true
+
+[node name="HUD" type="CanvasLayer" parent="."]
+layer = 4
+
+[node name="Prompts" type="Node2D" parent="."]
+
+[node name="Climb" type="Area2D" parent="Prompts"]
+position = Vector2(40, 130)
+script = ExtResource("6_prm")
+text = "The mountain begins.\nThe air grows thin."
+label_pos = Vector2(70, 92)
+dismiss_x = 120.0
+italic = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Prompts/Climb"]
+shape = SubResource("Z_climb")
+
+[node name="Stair" type="Area2D" parent="Prompts"]
+position = Vector2(232, 90)
+script = ExtResource("6_prm")
+text = "Your past self\nis a stair."
+label_pos = Vector2(212, 62)
+dismiss_x = 262.0
+italic = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Prompts/Stair"]
+shape = SubResource("Z_stair")
+
+[node name="Dark" type="Area2D" parent="Prompts"]
+position = Vector2(338, 30)
+script = ExtResource("6_prm")
+text = "In the dark, your fallen\nselves still glow."
+label_pos = Vector2(440, 72)
+dismiss_x = 525.0
+italic = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Prompts/Dark"]
+shape = SubResource("Z_dark")
+
+[node name="End" type="Area2D" parent="Prompts"]
+position = Vector2(610, 70)
+script = ExtResource("6_prm")
+text = "Higher still."
+label_pos = Vector2(588, 52)
+dismiss_x = -1.0
+italic = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Prompts/End"]
+shape = SubResource("Z_end")
+
+[node name="UI" type="Node" parent="."]
+script = ExtResource("7_ui")
+
+[node name="Camera" type="Camera2D" parent="."]
+position = Vector2(160, 90)
+script = ExtResource("9_cam")
+
+[node name="DeathLabel" type="Label" parent="HUD" groups=["death_label"]]
+offset_left = 240.0
+offset_top = 4.0
+offset_right = 316.0
+offset_bottom = 16.0
+horizontal_alignment = 2
+text = "DEATHS: 0"
+
+[node name="MsgLabel" type="Label" parent="HUD" groups=["msg_label"]]
+offset_left = 40.0
+offset_top = 34.0
+offset_right = 280.0
+offset_bottom = 74.0
+horizontal_alignment = 1
