@@ -8,3 +8,6 @@ Corpse-Effect/
 # Generated platform builds are distributed through GitHub Releases.
 builds/
 *.exe
+__pycache__/
+*.pyc
+docs/*.import

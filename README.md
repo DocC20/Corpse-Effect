@@ -16,7 +16,11 @@ Open the browser game in its own tab. Android: use **Install / Offline** or the 
 
 ## Upload to itch.io
 
-Upload `CorpseAndEffect-Web.zip` from the latest release as an HTML game, tick **This file will be played in the browser**, enable **Mobile friendly** and the fullscreen button, and use a 1280 × 720 viewport. `index.html` is at the ZIP root. Add the Mac and Windows ZIPs as separate downloadable files and select their matching operating systems.
+Upload `CorpseAndEffect-FINAL-itchio.zip` from the latest release as an HTML game, tick **This file will be played in the browser**, enable **Mobile friendly** and the fullscreen button, and use a 1280 × 720 viewport. `index.html` is at the ZIP root. Add the Mac and Windows ZIPs as separate downloadable files and select their matching operating systems.
+
+Current public Cloudflare test link: [Play through Cloudflare](https://miller-weed-robinson-fares.trycloudflare.com/). This session link is temporary and requires the host Mac and tunnel to remain running.
+
+To start a new public Cloudflare test link, run `python3 tools/serve_cloudflare.py --directory docs` with `cloudflared` installed. Share the printed `https://…trycloudflare.com` URL. The itch.io upload is hosted by itch.io independently.
 
 ## Controls
 - A / D or arrows: move

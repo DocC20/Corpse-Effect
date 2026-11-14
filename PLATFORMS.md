@@ -20,10 +20,10 @@ Create `builds/web`, then run:
 ```sh
 godot --headless --path . --export-release Web builds/web/index.html
 cd builds/web
-zip -r ../CorpseAndEffect-Web.zip .
+zip -r ../CorpseAndEffect-FINAL-itchio.zip .
 ```
 
-Upload that ZIP as an HTML game on itch.io. To test locally, serve `builds/web` over HTTP, for example with `python3 -m http.server 8000` from that directory. Do not open `index.html` with a file URL.
+Upload that ZIP as an HTML game on itch.io. For public mobile testing through Cloudflare, install the official `cloudflared` binary, then run `python3 tools/serve_cloudflare.py --directory builds/web` from the project root. Open the printed HTTPS `trycloudflare.com` link on your phone. The origin server binds only to this computer's loopback interface; players use the public tunnel URL. The Quick Tunnel ends when its process or the computer stops. Do not open `index.html` with a file URL.
 
 The Web build uses a single thread and the Compatibility renderer. It supports recent browsers with WebAssembly and WebGL 2. The PWA service worker enables offline play after an online load. HTTPS is required for installation outside localhost. Phones use the existing touch controls, including jump hold, simultaneous movement and jumping, death, dash after unlock, and pause. Touch actions are released on focus loss so movement does not stick after switching apps. Landscape is recommended.
 
