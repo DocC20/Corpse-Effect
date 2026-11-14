@@ -6,16 +6,19 @@ extends Node2D
 @export var progress_from := 40.0
 @export var progress_to := 300.0
 @export var level_size := Vector2(320, 180)
-@export_enum("plains", "withered", "highland", "grassrock", "hills", "cave") var ground_style := "plains"
-@export_enum("none", "plains", "withered", "highland", "grassrock", "hills", "cave") var ground_style_b := "none"
+@export_enum("plains", "withered", "highland", "grassrock", "hills", "cave", "ruins", "moss") var ground_style := "plains"
+@export_enum("none", "plains", "withered", "highland", "grassrock", "hills", "cave", "ruins", "moss") var ground_style_b := "none"
 @export var style_switch_x := -1.0
 @export_range(0.0, 1.0) var realism := 0.0
 @export_range(0.0, 1.0) var fx := 1.0
+@export_range(-1.0, 1.0) var wither := -1.0
 @export var level_number := 1
 @export var trees: Array[Vector2] = []
 @export var night_at_x := -1.0
 @export var night_mood := 0.75
 @export var night_message := "Night falls."
+@export var light_shaft_x := -1.0
+@export var plant_density := 1.0
 
 const BACK = preload("res://assets/country/back.png")
 const FOREST = preload("res://assets/country/forest.png")
@@ -36,6 +39,46 @@ const STYLIZE = preload("res://shaders/stylize.gdshader")
 const HAZARD_ROOTS = preload("res://assets/rocks/hazard_roots.png")
 const HAZARD_CRYSTALS = preload("res://assets/caverns/hazard_crystals.png")
 const HAZARD_CRYSTALS_DOWN = preload("res://assets/caverns/hazard_crystals_down.png")
+const RUIN_BLOCK = preload("res://assets/hollow_echo/ruin_block.png")
+const RUIN_FILL = preload("res://assets/hollow_echo/ruin_fill.png")
+const RUIN_LAYERS = [
+	preload("res://assets/hollow_echo/bg.png"),
+	preload("res://assets/hollow_echo/far_bg.png"),
+	preload("res://assets/hollow_echo/middle_bg.png"),
+	preload("res://assets/hollow_echo/near_bg.png"),
+]
+const RUIN_VINES = [preload("res://assets/hollow_echo/vine_a.png"), preload("res://assets/hollow_echo/vine_b.png")]
+const MOSS_BLOCK = preload("res://assets/mossy/moss_block.png")
+const MOSS_THORNS = preload("res://assets/mossy/thorns.png")
+const MOSS_THORNS_DOWN = preload("res://assets/mossy/thorns_down.png")
+const MOSS_HILLS = [preload("res://assets/mossy/hill_0.png"), preload("res://assets/mossy/hill_1.png"), preload("res://assets/mossy/hill_2.png")]
+const MOSS_HANGS = [preload("res://assets/mossy/hang_0.png"), preload("res://assets/mossy/hang_1.png"), preload("res://assets/mossy/hang_2.png"), preload("res://assets/mossy/hang_3.png")]
+const MOSS_ROCKS = [preload("res://assets/mossy/rock_0.png"), preload("res://assets/mossy/rock_1.png"), preload("res://assets/mossy/rock_2.png")]
+const BIG_ROCKS = [preload("res://assets/brown_cave/bigrock_0.png"), preload("res://assets/brown_cave/bigrock_1.png"), preload("res://assets/brown_cave/bigrock_2.png")]
+const PLANT_SHEETS = {
+	"dry_grass": [preload("res://assets/plants/dry_grass.png"), 15],
+	"dry_curl": [preload("res://assets/plants/dry_curl.png"), 15],
+	"dry_tuft": [preload("res://assets/plants/dry_tuft.png"), 15],
+	"moss_reed": [preload("res://assets/plants/moss_reed.png"), 23],
+	"moss_tall": [preload("res://assets/plants/moss_tall.png"), 15],
+	"moss_wind": [preload("res://assets/plants/moss_wind.png"), 15],
+	"moss_bush": [preload("res://assets/plants/moss_bush.png"), 23],
+	"glow_flower": [preload("res://assets/plants/glow_flower.png"), 15],
+	"green_blades": [preload("res://assets/plants/green_blades.png"), 23],
+	"fern": [preload("res://assets/plants/fern.png"), 20],
+}
+const SURFACES = {
+	"plains": "grass",
+	"withered": "leaves",
+	"highland": "grass",
+	"grassrock": "gravel",
+	"hills": "gravel",
+	"cave": "stone",
+	"ruins": "sneaker",
+	"moss": "mud",
+}
+const MODULATE_RUINS = Color(0.5, 0.62, 0.85)
+const MODULATE_MOSS = Color(0.5, 0.66, 0.6)
 
 const SKY_TOP_HAPPY = Color(0.42, 0.7, 0.95)
 const SKY_BOTTOM_HAPPY = Color(1.0, 0.88, 0.68)
@@ -53,6 +96,8 @@ const HAZARD_TINT = {
 	"highland": Color(0.68, 0.78, 0.58),
 	"hills": Color(1, 1, 1),
 	"cave": Color(1, 1, 1),
+	"ruins": Color(0.55, 0.9, 1.0),
+	"moss": Color(0.9, 1.0, 0.9),
 }
 
 const TREE_SCALE = 1.35
@@ -60,6 +105,7 @@ const TREE_SCALE = 1.35
 static var _light_tex: Texture2D
 static var carried_mood := -1.0
 static var _light_tex_stepped: Texture2D
+static var _plant_frames := {}
 
 var mood := 0.0
 var sky_mat: ShaderMaterial
@@ -79,6 +125,8 @@ var mood_speed := 1.5
 var applied_mood := -1.0
 var low_end := false
 var moon_halo: Sprite2D
+var butterflies: CPUParticles2D
+var fireflies: CPUParticles2D
 var time := 0.0
 
 
@@ -113,23 +161,38 @@ func style_at(x: float) -> String:
 	return ground_style
 
 
+func surface_at(x: float) -> String:
+	return SURFACES.get(style_at(x), "stone")
+
+
+static func underground(style: String) -> bool:
+	return style == "cave" or style == "ruins" or style == "moss"
+
+
 func dread() -> float:
-	return clampf((level_number - 1) / 14.0 + smoothstep(0.55, 0.95, mood) * 0.15, 0.0, 1.0)
+	return clampf((level_number - 1) / 9.0 + smoothstep(0.55, 0.95, mood) * 0.15, 0.0, 1.0)
 
 
 func _is_grassy(style: String) -> bool:
 	return style == "plains" or style == "withered" or style == "highland"
 
 
+func _is_boundary(body: Node, rect: ColorRect) -> bool:
+	if not body.name.begins_with("Wall"):
+		return false
+	var gx: float = body.global_position.x
+	return gx + rect.offset_right <= 1.0 or gx + rect.offset_left >= level_size.x - 1.0
+
+
 func _has_cave() -> bool:
-	return ground_style == "cave" or ground_style_b == "cave"
+	return underground(ground_style) or underground(ground_style_b)
 
 
 func _ready() -> void:
 	add_to_group("atmosphere")
 	low_end = OS.has_feature("mobile") or OS.has_feature("web")
 	var root := get_parent()
-	var cave := ground_style == "cave"
+	var cave := underground(ground_style)
 	add_to_group("atmosphere_root")
 
 	var bg := root.get_node_or_null("Background")
@@ -142,7 +205,8 @@ func _ready() -> void:
 	style_mat.set_shader_parameter("saturation", lerpf(1.15, 1.0, realism))
 	style_mat.set_shader_parameter("contrast", lerpf(0.88, 1.0, realism))
 	style_mat.set_shader_parameter("lift", lerpf(0.04, 0.0, realism))
-	style_mat.set_shader_parameter("wither", 0.65 if ground_style == "withered" else 0.0)
+	var w := wither if wither >= 0.0 else (0.65 if ground_style == "withered" else 0.0)
+	style_mat.set_shader_parameter("wither", w)
 
 	var sky := ColorRect.new()
 	sky.size = level_size
@@ -199,12 +263,20 @@ func _ready() -> void:
 			drift = _make_particles(Color(0.78, 0.55, 0.3), Vector2(4, 10), 1.5)
 		"cave":
 			drift = _make_particles(Color(0.7, 0.62, 0.85), Vector2(0, -1), 1.0)
+		"ruins":
+			drift = _make_particles(Color(0.5, 0.85, 1.0), Vector2(0, -2), 1.0)
+		"moss":
+			drift = _make_particles(Color(0.65, 1.0, 0.6), Vector2(1, -2), 1.0)
 		_:
 			drift = _make_particles(Color(1.0, 0.92, 0.6), Vector2(0, -3), 1.0)
 	ash = _make_particles(Color(0.7, 0.75, 0.88), Vector2(0, 9), 1.5)
 
 	var x_end := level_size.x + 32.0
-	if ground_style == "cave" and (ground_style_b == "none" or ground_style_b == "" or style_switch_x < 0.0):
+	if ground_style == "ruins":
+		_add_ruins_backdrop(root, -32.0, x_end)
+	elif ground_style == "moss":
+		_add_moss_backdrop(root, -32.0, x_end)
+	elif ground_style == "cave" and (ground_style_b == "none" or ground_style_b == "" or style_switch_x < 0.0):
 		_add_cave_backdrop(root, -32.0, x_end)
 	elif _has_cave() and style_switch_x >= 0.0:
 		if ground_style == "cave":
@@ -220,13 +292,21 @@ func _ready() -> void:
 	for child in root.get_children():
 		if child is StaticBody2D:
 			var rect := child.get_node_or_null("ColorRect") as ColorRect
-			if rect and not child.name.begins_with("Wall"):
+			if rect and not _is_boundary(child, rect):
 				_skin_ground(child, rect, style_at(child.global_position.x))
 			for sub in child.get_children():
 				if sub is Polygon2D:
 					_ceiling_hazard(sub as Polygon2D, style_at(child.global_position.x))
 		elif child is Polygon2D:
 			_restyle_spikes(child as Polygon2D)
+
+	_decorate(root)
+	if not underground(ground_style):
+		_add_details(root)
+	else:
+		_add_drips(root)
+	if light_shaft_x >= 0.0:
+		_add_light_shaft(root, light_shaft_x)
 
 	var goal := root.get_node_or_null("Goal")
 	if goal:
@@ -340,8 +420,10 @@ func _add_cave_mouth(root: Node, x: float) -> void:
 	var floor_y := _floor_top_at(root, x + 4.0)
 	var open_top := floor_y - 46.0
 
-	root.add_child.call_deferred(_gradient_rect(Vector2(x - 70.0, -40.0), Vector2(70, level_size.y + 80.0), Color(dark, 0.0), Color(dark, 0.75), -20))
-	root.add_child.call_deferred(_gradient_rect(Vector2(x, -40.0), Vector2(150, level_size.y + 80.0), Color(dark, 0.97), Color(dark, 0.0), -20))
+	root.add_child.call_deferred(_gradient_rect(Vector2(x - 120.0, -40.0), Vector2(120, level_size.y + 80.0), Color(dark, 0.0), Color(dark, 0.92), -20))
+	root.add_child.call_deferred(_gradient_rect(Vector2(x, -40.0), Vector2(200, level_size.y + 80.0), Color(dark, 0.92), Color(dark, 0.0), -20))
+	var ground_fade := _gradient_rect(Vector2(x - 50.0, floor_y - 30.0), Vector2(100, 70), Color(dark, 0.0), Color(dark, 0.55), 2)
+	root.add_child.call_deferred(ground_fade)
 
 	var arch := _rock_block(Vector2(x - 26.0, -60.0), Vector2(52, open_top + 60.0))
 	arch.z_index = 3
@@ -391,6 +473,19 @@ func _short_grass(surface: Vector2, width: float) -> Node2D:
 	return holder
 
 
+func _side_shade(pos: Vector2, size: Vector2) -> Node2D:
+	var holder := Node2D.new()
+	holder.z_index = 1
+	var w := minf(10.0, size.x * 0.25)
+	var dark := Color(0.05, 0.06, 0.04)
+	holder.add_child(_gradient_rect(pos + Vector2(0, 6), Vector2(w, size.y - 6), Color(dark, 0.5), Color(dark, 0.0), 0))
+	holder.add_child(_gradient_rect(pos + Vector2(size.x - w, 6), Vector2(w, size.y - 6), Color(dark, 0.0), Color(dark, 0.5), 0))
+	var top := _gradient_rect(pos + Vector2(0, 16), Vector2(size.x, 1), Color(dark, 0.0), Color(dark, 0.0), 0)
+	top.visible = false
+	holder.add_child(top)
+	return holder
+
+
 func _rock_block(pos: Vector2, size: Vector2) -> Control:
 	var holder := Control.new()
 	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -403,7 +498,7 @@ func _rock_block(pos: Vector2, size: Vector2) -> Control:
 	var mv := mini(14, int(size.y / 2.0))
 	var block := NinePatchRect.new()
 	block.texture = ROCK_BLOCK
-	block.region_rect = Rect2(0, 2, 96, 94)
+	block.region_rect = Rect2(2, 2, 92, 92)
 	block.draw_center = false
 	block.patch_margin_left = mh
 	block.patch_margin_right = mh
@@ -425,18 +520,38 @@ func _skin_ground(body: Node, rect: ColorRect, style: String) -> void:
 	var pit := body.name.begins_with("Pit")
 	var bname := String(body.name)
 	var ceiling := bname.contains("Ceiling") or bname.contains("Roof")
-	if style != "cave" and (ceiling or bname.contains("Cliff")):
+	if not underground(style) and (ceiling or (bname.contains("Cliff") and _has_cave())):
 		body.add_child.call_deferred(_rock_block(pos, size))
 		return
 
 	match style:
+		"ruins":
+			if pit:
+				var dark := _tiled(RUIN_FILL, pos, size)
+				dark.modulate = Color(0.5, 0.5, 0.6)
+				body.add_child.call_deferred(dark)
+			else:
+				body.add_child.call_deferred(_nine(RUIN_BLOCK, pos, size, 16, 1.0))
+		"moss":
+			if pit:
+				var dark := ColorRect.new()
+				dark.color = Color(0.02, 0.03, 0.02)
+				dark.position = pos
+				dark.size = size
+				dark.mouse_filter = Control.MOUSE_FILTER_IGNORE
+				body.add_child.call_deferred(dark)
+			else:
+				var holder := _nine(MOSS_BLOCK, pos - Vector2(3, 3), size + Vector2(6, 6), 128, 0.25, true)
+				holder.z_index = 1
+				body.add_child.call_deferred(holder)
 		"plains", "withered", "highland":
 			if pit:
 				var dark := _tiled(GROUND_FILL, pos, size)
 				dark.modulate = Color(0.35, 0.35, 0.42)
 				body.add_child.call_deferred(dark)
 			else:
-				body.add_child.call_deferred(_short_grass(pos, size.x))
+				body.add_child.call_deferred(_short_grass(pos - Vector2(4, 0), size.x + 8.0))
+				body.add_child.call_deferred(_side_shade(pos, size))
 				var clip := Control.new()
 				clip.clip_contents = true
 				clip.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -498,17 +613,23 @@ func _restyle_spikes(poly: Polygon2D) -> void:
 	var b := _poly_bounds(poly)
 	var style := style_at(poly.global_position.x + b.get_center().x)
 	poly.visible = false
-	var tex: Texture2D = HAZARD_CRYSTALS if style == "cave" else HAZARD_ROOTS
+	var tex: Texture2D = HAZARD_ROOTS
+	if style == "cave" or style == "ruins":
+		tex = HAZARD_CRYSTALS
+	elif style == "moss":
+		tex = MOSS_THORNS
 	var h := float(tex.get_height())
 	var strip := _tiled(tex, Vector2(b.position.x, b.end.y - h), Vector2(b.size.x, h))
 	strip.modulate = HAZARD_TINT.get(style, Color.WHITE)
+	if style == "moss":
+		strip.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	var holder := Node2D.new()
 	holder.position = poly.position
 	holder.z_index = 0
 	holder.add_child(strip)
 	poly.get_parent().add_child.call_deferred(holder)
-	if style == "cave":
-		var glow := _make_light(Color(0.75, 0.5, 1.0), b.size.x / 110.0)
+	if style == "cave" or style == "ruins":
+		var glow := _make_light(Color(0.75, 0.5, 1.0) if style == "cave" else Color(0.4, 0.85, 1.0), b.size.x / 110.0)
 		glow.energy = 0.3
 		glow.position = poly.position + Vector2(b.get_center().x, b.end.y - h)
 		poly.get_parent().add_child.call_deferred(glow)
@@ -519,14 +640,20 @@ func _ceiling_hazard(poly: Polygon2D, style: String) -> void:
 		return
 	var b := _poly_bounds(poly)
 	poly.visible = false
-	var tex: Texture2D = HAZARD_CRYSTALS_DOWN if style == "cave" else HAZARD_ROOTS
+	var tex: Texture2D = HAZARD_ROOTS
+	if style == "cave" or style == "ruins":
+		tex = HAZARD_CRYSTALS_DOWN
+	elif style == "moss":
+		tex = MOSS_THORNS_DOWN
 	var strip := _tiled(tex, poly.position + b.position, Vector2(b.size.x, float(tex.get_height())))
-	if style != "cave":
+	if not underground(style):
 		strip.flip_v = true
 	strip.modulate = HAZARD_TINT.get(style, Color.WHITE)
+	if style == "moss":
+		strip.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	poly.add_sibling.call_deferred(strip)
-	if style == "cave":
-		var glow := _make_light(Color(0.75, 0.5, 1.0), b.size.x / 110.0)
+	if style == "cave" or style == "ruins":
+		var glow := _make_light(Color(0.75, 0.5, 1.0) if style == "cave" else Color(0.4, 0.85, 1.0), b.size.x / 110.0)
 		glow.energy = 0.3
 		glow.position = poly.position + b.get_center()
 		poly.add_sibling.call_deferred(glow)
@@ -606,6 +733,7 @@ func _process(delta: float) -> void:
 		target = maxf(target, night_mood)
 
 	mood = lerpf(mood, target, 1.0 - exp(-mood_speed * delta))
+	_bend_plants(delta)
 	if absf(mood - applied_mood) > 0.002:
 		_apply(mood)
 	_update_lights()
@@ -638,14 +766,23 @@ func _apply(m: float) -> void:
 		f.set_shader_parameter("fog_color", FOG_HAPPY.lerp(FOG_GLOOMY, m))
 		f.set_shader_parameter("density", lerpf(0.15, 0.6, m) * lerpf(0.5, 1.0, fx))
 	vignette_mat.set_shader_parameter("strength", lerpf(0.12, 0.6, m) * lerpf(0.6, 1.0, fx))
-	modulate_node.color = MODULATE_HAPPY.lerp(MODULATE_GLOOMY, smoothstep(0.1, 1.0, m))
-	if ground_style == "cave":
+	var gloomy := MODULATE_GLOOMY
+	if ground_style == "ruins":
+		gloomy = MODULATE_RUINS
+	elif ground_style == "moss":
+		gloomy = MODULATE_MOSS
+	modulate_node.color = MODULATE_HAPPY.lerp(gloomy, smoothstep(0.1, 1.0, m))
+	if underground(ground_style):
 		drift.modulate.a = 1.0
 	else:
 		drift.modulate.a = (1.0 - smoothstep(0.1, 0.5, m)) * lerpf(0.5, 1.0, fx)
-	ash.modulate.a = 0.0 if ground_style == "cave" else smoothstep(0.3, 0.8, m)
+	ash.modulate.a = 0.0 if underground(ground_style) else smoothstep(0.3, 0.8, m)
 	if moon:
 		moon.modulate.a = smoothstep(0.25, 0.6, m)
+	if butterflies:
+		butterflies.modulate.a = 1.0 - smoothstep(0.2, 0.45, m)
+	if fireflies:
+		fireflies.modulate.a = smoothstep(0.35, 0.7, m)
 	sky_mat.set_shader_parameter("stars", smoothstep(0.4, 0.8, m))
 	if goal_light:
 		goal_light.energy = lerpf(0.3, 1.0, m)
@@ -667,3 +804,423 @@ func _update_lights() -> void:
 		i += 1
 	for bl in get_tree().get_nodes_in_group("pad_bounce"):
 		(bl as PointLight2D).energy = lerpf(0.05, 0.3, m) * realism
+	for dl in get_tree().get_nodes_in_group("deco_light"):
+		var d := dl as PointLight2D
+		d.energy = float(d.get_meta("glow", 0.5)) * lerpf(0.4, 1.0, m) * (0.9 + sin(time * 1.7 + d.position.x) * 0.1)
+
+
+func _nine(tex: Texture2D, pos: Vector2, size: Vector2, margin: int, s: float, smooth := false) -> Control:
+	var holder := Control.new()
+	if smooth:
+		holder.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	holder.position = pos
+	holder.size = size / s
+	holder.scale = Vector2.ONE * s
+	var inner_size := size / s
+	var mh := mini(margin, int(inner_size.x / 2.0))
+	var mv := mini(margin, int(inner_size.y / 2.0))
+	var block := NinePatchRect.new()
+	block.texture = tex
+	block.patch_margin_left = mh
+	block.patch_margin_right = mh
+	block.patch_margin_top = mv
+	block.patch_margin_bottom = mv
+	block.axis_stretch_horizontal = NinePatchRect.AXIS_STRETCH_MODE_TILE_FIT
+	block.axis_stretch_vertical = NinePatchRect.AXIS_STRETCH_MODE_TILE_FIT
+	block.size = inner_size
+	block.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	block.material = style_mat
+	holder.add_child(block)
+	return holder
+
+
+func _add_ruins_backdrop(root: Node, x0: float, x1: float) -> void:
+	for i in RUIN_LAYERS.size():
+		var tex: Texture2D = RUIN_LAYERS[i]
+		var r := TextureRect.new()
+		r.texture = tex
+		r.stretch_mode = TextureRect.STRETCH_TILE
+		r.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		r.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+		r.position = Vector2(x0, 0)
+		r.size = Vector2((x1 - x0) * 2.0, tex.get_height())
+		r.scale = Vector2(0.5, 0.5)
+		r.z_index = -96 + i
+		r.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		r.material = style_mat
+		root.add_child.call_deferred(r)
+
+
+func _add_moss_backdrop(root: Node, x0: float, x1: float) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = level_number * 131
+	var x := x0
+	while x < x1:
+		var rock := Sprite2D.new()
+		rock.texture = BIG_ROCKS[rng.randi() % BIG_ROCKS.size()]
+		rock.centered = false
+		var s := rng.randf_range(0.55, 0.85)
+		rock.scale = Vector2.ONE * s
+		rock.flip_h = rng.randf() < 0.5
+		rock.position = Vector2(x, level_size.y + 8.0 - rock.texture.get_height() * s)
+		rock.modulate = Color(0.2, 0.18, 0.17)
+		rock.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+		rock.z_index = -95
+		root.add_child.call_deferred(rock)
+		x += rock.texture.get_width() * s * rng.randf_range(0.6, 0.9)
+	x = x0
+	while x < x1:
+		var hill := Sprite2D.new()
+		hill.texture = MOSS_HILLS[rng.randi() % MOSS_HILLS.size()]
+		hill.centered = false
+		var s2 := rng.randf_range(0.4, 0.65)
+		hill.scale = Vector2.ONE * s2
+		hill.flip_h = rng.randf() < 0.5
+		hill.position = Vector2(x, level_size.y + 6.0 - hill.texture.get_height() * s2)
+		hill.modulate = Color(0.24, 0.36, 0.28)
+		hill.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+		hill.z_index = -94
+		root.add_child.call_deferred(hill)
+		x += hill.texture.get_width() * s2 * rng.randf_range(0.7, 1.1)
+	x = x0
+	while x < x1:
+		var hang := Sprite2D.new()
+		hang.texture = MOSS_HANGS[rng.randi() % MOSS_HANGS.size()]
+		hang.centered = false
+		var s3 := rng.randf_range(0.3, 0.5)
+		hang.scale = Vector2.ONE * s3
+		hang.position = Vector2(x, -4.0)
+		hang.modulate = Color(0.3, 0.42, 0.34)
+		hang.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+		hang.z_index = -93
+		root.add_child.call_deferred(hang)
+		x += rng.randf_range(18.0, 46.0)
+
+
+static func plant_frames(key: String) -> SpriteFrames:
+	if _plant_frames.has(key):
+		return _plant_frames[key]
+	var spec: Array = PLANT_SHEETS[key]
+	var sheet: Texture2D = spec[0]
+	var n: int = spec[1]
+	var w := sheet.get_width() / n
+	var sf := SpriteFrames.new()
+	sf.set_animation_speed("default", 12.0)
+	sf.set_animation_loop("default", true)
+	for i in n:
+		var a := AtlasTexture.new()
+		a.atlas = sheet
+		a.region = Rect2(i * w, 0, w, sheet.get_height())
+		sf.add_frame("default", a)
+	_plant_frames[key] = sf
+	return sf
+
+
+func make_plant(key: String, foot: Vector2, s: float, rng: RandomNumberGenerator) -> AnimatedSprite2D:
+	var p := AnimatedSprite2D.new()
+	p.sprite_frames = plant_frames(key)
+	var h := float(p.sprite_frames.get_frame_texture("default", 0).get_height())
+	p.offset = Vector2(0, -h / 2.0)
+	p.position = foot
+	p.scale = Vector2.ONE * s
+	p.flip_h = rng.randf() < 0.5
+	p.z_index = -4
+	p.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	p.material = style_mat
+	p.play("default")
+	p.add_to_group("plant")
+	p.frame = rng.randi() % p.sprite_frames.get_frame_count("default")
+	p.speed_scale = rng.randf_range(0.7, 1.2)
+	return p
+
+
+func _decorate(root: Node) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = level_number * 977 + 5
+	var flower_lights := 0
+	for child in root.get_children():
+		if not (child is StaticBody2D):
+			continue
+		var rect := child.get_node_or_null("ColorRect") as ColorRect
+		if rect == null or _is_boundary(child, rect):
+			continue
+		var bname := String(child.name)
+		if bname.begins_with("Pit") or bname.begins_with("Wall"):
+			continue
+		var gx: float = child.global_position.x
+		var gy: float = child.global_position.y
+		var x0: float = gx + rect.offset_left
+		var x1: float = gx + rect.offset_right
+		var top: float = gy + rect.offset_top
+		var bottom: float = gy + rect.offset_bottom
+		var style := style_at(gx)
+		var ceiling := bname.contains("Ceiling") or bname.contains("Roof")
+		if ceiling:
+			if style == "moss":
+				var hx := x0 + rng.randf_range(4.0, 20.0)
+				while hx < x1 - 4.0:
+					var hang := Sprite2D.new()
+					hang.texture = MOSS_HANGS[rng.randi() % MOSS_HANGS.size()]
+					hang.centered = false
+					var hs := rng.randf_range(0.18, 0.3)
+					hang.scale = Vector2.ONE * hs
+					hang.position = Vector2(hx - hang.texture.get_width() * hs / 2.0, bottom - 3.0)
+					hang.z_index = -3
+					hang.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+					hang.material = style_mat
+					root.add_child.call_deferred(hang)
+					hx += rng.randf_range(16.0, 40.0)
+			elif style == "ruins":
+				var vx := x0 + rng.randf_range(6.0, 30.0)
+				while vx < x1 - 8.0:
+					var vine := Sprite2D.new()
+					vine.texture = RUIN_VINES[rng.randi() % RUIN_VINES.size()]
+					vine.centered = false
+					vine.position = Vector2(vx, bottom - 1.0)
+					vine.z_index = -3
+					root.add_child.call_deferred(vine)
+					vx += rng.randf_range(30.0, 70.0)
+			continue
+		if top < 4.0:
+			continue
+		var spacing := 0.0
+		var keys: Array = []
+		var s := 0.5
+		match style:
+			"plains":
+				spacing = 34.0
+				keys = ["green_blades", "green_blades", "fern", "moss_wind"]
+				s = 0.32
+			"withered":
+				spacing = 40.0
+				keys = ["dry_grass", "dry_curl", "dry_tuft", "fern"]
+				s = 0.38
+			"highland":
+				spacing = 50.0
+				keys = ["dry_grass", "dry_tuft", "green_blades", "fern"]
+				s = 0.36
+			"grassrock", "hills":
+				spacing = 120.0
+				keys = ["dry_tuft", "dry_curl"]
+				s = 0.38
+			"moss":
+				spacing = 26.0
+				keys = ["moss_reed", "moss_tall", "moss_wind", "moss_bush", "glow_flower"]
+				s = 0.42
+		if spacing <= 0.0 or plant_density <= 0.0:
+			continue
+		spacing /= plant_density
+		var px := x0 + rng.randf_range(3.0, spacing)
+		while px < x1 - 3.0:
+			var key: String = keys[rng.randi() % keys.size()]
+			var plant := make_plant(key, Vector2(px, top + 3.0), s * rng.randf_range(0.8, 1.15), rng)
+			root.add_child.call_deferred(plant)
+			if key == "glow_flower" and flower_lights < 8:
+				flower_lights += 1
+				var gl := _make_light(Color(0.45, 0.85, 1.0), 0.35)
+				gl.position = Vector2(px, top - 18.0)
+				gl.set_meta("glow", 0.6)
+				gl.add_to_group("deco_light")
+				root.add_child.call_deferred(gl)
+			px += spacing * rng.randf_range(0.6, 1.4)
+		if style == "moss" and x1 - x0 > 50.0 and rng.randf() < 0.5:
+			var rock := Sprite2D.new()
+			rock.texture = MOSS_ROCKS[rng.randi() % MOSS_ROCKS.size()]
+			var rs := rng.randf_range(0.28, 0.38)
+			rock.scale = Vector2.ONE * rs
+			rock.offset = Vector2(0, -rock.texture.get_height() / 2.0)
+			rock.position = Vector2(rng.randf_range(x0 + 14.0, x1 - 14.0), top + 4.0)
+			rock.z_index = -6
+			rock.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+			rock.material = style_mat
+			root.add_child.call_deferred(rock)
+		if style == "ruins" and x1 - x0 > 60.0 and rng.randf() < 0.6:
+			var cr := Sprite2D.new()
+			cr.texture = preload("res://assets/hollow_echo/crystal.png")
+			cr.offset = Vector2(0, -cr.texture.get_height() / 2.0)
+			cr.scale = Vector2.ONE * 0.5
+			cr.position = Vector2(rng.randf_range(x0 + 10.0, x1 - 10.0), top + 1.0)
+			cr.z_index = -4
+			root.add_child.call_deferred(cr)
+			var cl := _make_light(Color(0.4, 0.8, 1.0), 0.4)
+			cl.position = cr.position + Vector2(0, -8)
+			cl.set_meta("glow", 0.5)
+			cl.add_to_group("deco_light")
+			root.add_child.call_deferred(cl)
+
+
+func _add_light_shaft(root: Node, x: float) -> void:
+	var add := CanvasItemMaterial.new()
+	add.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	for spec in [[70.0, 0.22], [34.0, 0.4]]:
+		var g := Gradient.new()
+		g.set_color(0, Color(1.0, 0.86, 0.55, spec[1]))
+		g.set_color(1, Color(1.0, 0.86, 0.55, 0.0))
+		var tex := GradientTexture2D.new()
+		tex.gradient = g
+		tex.fill_from = Vector2(0.5, 0.0)
+		tex.fill_to = Vector2(0.5, 1.0)
+		tex.width = 8
+		tex.height = 64
+		var beam := TextureRect.new()
+		beam.texture = tex
+		beam.stretch_mode = TextureRect.STRETCH_SCALE
+		beam.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		beam.size = Vector2(spec[0], level_size.y + 20.0)
+		beam.position = Vector2(x - spec[0] / 2.0, -20.0)
+		beam.material = add
+		beam.z_index = 2
+		beam.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+		beam.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		root.add_child.call_deferred(beam)
+	var sun := _make_light(Color(1.0, 0.82, 0.5), 1.6)
+	sun.position = Vector2(x, 10)
+	sun.set_meta("glow", 1.0)
+	sun.add_to_group("deco_light")
+	root.add_child.call_deferred(sun)
+	var motes := CPUParticles2D.new()
+	motes.amount = 18
+	motes.lifetime = 5.0
+	motes.preprocess = 5.0
+	motes.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	motes.emission_rect_extents = Vector2(14, 60)
+	motes.position = Vector2(x, 60)
+	motes.gravity = Vector2(0, 3)
+	motes.initial_velocity_min = 1.0
+	motes.initial_velocity_max = 4.0
+	motes.spread = 180.0
+	motes.color = Color(1.0, 0.9, 0.6)
+	var fade := Gradient.new()
+	fade.set_color(0, Color(1, 1, 1, 0))
+	fade.add_point(0.3, Color(1, 1, 1, 1))
+	fade.set_color(fade.get_point_count() - 1, Color(1, 1, 1, 0))
+	motes.color_ramp = fade
+	motes.z_index = 3
+	root.add_child.call_deferred(motes)
+
+
+func _add_details(root: Node) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = level_number * 53 + 11
+	var grassy := _is_grassy(ground_style)
+	if grassy:
+		var x := rng.randf_range(-20.0, 40.0)
+		while x < level_size.x + 20.0:
+			var t := Sprite2D.new()
+			t.texture = TREE
+			t.centered = false
+			var ts := rng.randf_range(0.55, 0.85)
+			t.scale = Vector2.ONE * ts
+			t.flip_h = rng.randf() < 0.5
+			t.position = Vector2(x, level_size.y - 22.0 - TREE.get_height() * ts)
+			var fade := rng.randf_range(0.45, 0.6)
+			t.modulate = Color(0.62, 0.72, 0.85).lerp(Color(1, 1, 1), 1.0 - fade) * Color(1, 1, 1, 0.85)
+			if ground_style == "withered":
+				t.modulate = Color(0.75, 0.62, 0.48, 0.8)
+			t.z_index = -93
+			t.material = style_mat
+			root.add_child.call_deferred(t)
+			x += rng.randf_range(70.0, 140.0)
+	if ground_style == "plains" or ground_style == "highland":
+		butterflies = CPUParticles2D.new()
+		butterflies.amount = int(clampf(level_size.x / 40.0, 6.0, 20.0))
+		butterflies.lifetime = 7.0
+		butterflies.preprocess = 7.0
+		butterflies.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+		butterflies.emission_rect_extents = Vector2(level_size.x / 2.0, 40.0)
+		butterflies.position = Vector2(level_size.x / 2.0, 100.0)
+		butterflies.direction = Vector2(1, -0.3)
+		butterflies.spread = 180.0
+		butterflies.gravity = Vector2.ZERO
+		butterflies.initial_velocity_min = 6.0
+		butterflies.initial_velocity_max = 14.0
+		butterflies.tangential_accel_min = -40.0
+		butterflies.tangential_accel_max = 40.0
+		butterflies.scale_amount_min = 1.0
+		butterflies.scale_amount_max = 1.6
+		butterflies.color = Color(1.0, 0.92, 0.55)
+		butterflies.hue_variation_min = -0.35
+		butterflies.hue_variation_max = 0.35
+		var bf := Gradient.new()
+		bf.set_color(0, Color(1, 1, 1, 0))
+		bf.add_point(0.15, Color(1, 1, 1, 1))
+		bf.add_point(0.85, Color(1, 1, 1, 1))
+		bf.set_color(bf.get_point_count() - 1, Color(1, 1, 1, 0))
+		butterflies.color_ramp = bf
+		butterflies.z_index = 6
+		root.add_child.call_deferred(butterflies)
+	if grassy or ground_style == "grassrock":
+		fireflies = CPUParticles2D.new()
+		fireflies.amount = int(clampf(level_size.x / 25.0, 10.0, 30.0))
+		fireflies.lifetime = 5.0
+		fireflies.preprocess = 5.0
+		fireflies.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+		fireflies.emission_rect_extents = Vector2(level_size.x / 2.0, 30.0)
+		fireflies.position = Vector2(level_size.x / 2.0, 118.0)
+		fireflies.spread = 180.0
+		fireflies.gravity = Vector2(0, -1)
+		fireflies.initial_velocity_min = 2.0
+		fireflies.initial_velocity_max = 6.0
+		fireflies.tangential_accel_min = -12.0
+		fireflies.tangential_accel_max = 12.0
+		fireflies.scale_amount_min = 1.0
+		fireflies.scale_amount_max = 1.0
+		fireflies.color = Color(1.0, 0.95, 0.55)
+		var ff := Gradient.new()
+		ff.set_color(0, Color(1, 1, 1, 0))
+		ff.add_point(0.3, Color(1, 1, 1, 1))
+		ff.add_point(0.5, Color(1, 1, 1, 0.3))
+		ff.add_point(0.7, Color(1, 1, 1, 1))
+		ff.set_color(ff.get_point_count() - 1, Color(1, 1, 1, 0))
+		fireflies.color_ramp = ff
+		fireflies.z_index = 6
+		fireflies.modulate.a = 0.0
+		root.add_child.call_deferred(fireflies)
+
+
+func _bend_plants(delta: float) -> void:
+	if player == null:
+		return
+	var feet: Vector2 = player.global_position + Vector2(0, 16)
+	var vel: Vector2 = player.get("velocity")
+	var vx: float = vel.x
+	var k := 1.0 - exp(-10.0 * delta)
+	for n in get_tree().get_nodes_in_group("plant"):
+		var p := n as Node2D
+		var dx := p.global_position.x - feet.x
+		var dy := absf(p.global_position.y - feet.y)
+		var target := 0.0
+		if absf(dx) < 14.0 and dy < 10.0:
+			var push := 1.0 - absf(dx) / 14.0
+			target = signf(dx if absf(vx) < 5.0 else vx) * 0.45 * push
+		p.skew = lerpf(p.skew, target, k)
+
+
+func _add_drips(root: Node) -> void:
+	var drips := CPUParticles2D.new()
+	drips.amount = int(clampf(level_size.x / 60.0, 4.0, 14.0))
+	drips.lifetime = 1.2
+	drips.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	drips.emission_rect_extents = Vector2(level_size.x / 2.0, 1.0)
+	drips.position = Vector2(level_size.x / 2.0, 12.0)
+	drips.direction = Vector2.DOWN
+	drips.spread = 0.0
+	drips.gravity = Vector2(0, 260)
+	drips.initial_velocity_min = 0.0
+	drips.initial_velocity_max = 5.0
+	drips.scale_amount_min = 1.0
+	drips.scale_amount_max = 1.0
+	drips.randomness = 1.0
+	var c := Color(0.6, 0.75, 1.0)
+	if ground_style == "moss":
+		c = Color(0.65, 0.95, 0.75)
+	drips.color = c
+	var g := Gradient.new()
+	g.set_color(0, Color(1, 1, 1, 0.0))
+	g.add_point(0.1, Color(1, 1, 1, 0.8))
+	g.add_point(0.7, Color(1, 1, 1, 0.5))
+	g.set_color(g.get_point_count() - 1, Color(1, 1, 1, 0.0))
+	drips.color_ramp = g
+	drips.z_index = 5
+	root.add_child.call_deferred(drips)

@@ -1,11 +1,13 @@
 extends CharacterBody2D
 
-const REST_SCALE = Vector2(1.15, 0.4)
+const REST_SCALE = Vector2(1.0, 0.9)
+const FLAT_SCALE = Vector2(1.35, 0.45)
 
 var texture: Texture2D
+var art_scale := 1.0
 var flip := false
 var embedded := false
-var sprite: Sprite2D
+var sprite: Node2D
 var gone := false
 
 
@@ -20,14 +22,18 @@ func _ready() -> void:
 	shape.shape = rect
 	add_child(shape)
 
-	sprite = Sprite2D.new()
-	sprite.texture = texture
-	sprite.flip_h = flip
-	sprite.offset.y = -16.0
-	sprite.position.y = 5.0 if embedded else 3.0
+	sprite = Node2D.new()
+	sprite.position.y = 2.0 if embedded else 0.0
 	sprite.modulate = Color(1.0, 0.55, 0.25, 0.0)
-	sprite.scale = Vector2(0.7, 1.0)
+	sprite.scale = Vector2(0.7, 1.4)
 	add_child(sprite)
+
+	var art := Sprite2D.new()
+	art.texture = texture
+	art.scale = Vector2.ONE * art_scale
+	art.rotation = -PI / 2.0 if flip else PI / 2.0
+	art.position = Vector2(-1.0 if flip else 1.0, -1.0)
+	sprite.add_child(art)
 
 	var light := PointLight2D.new()
 	light.texture = Atmosphere.light_texture()
@@ -55,7 +61,7 @@ func _physics_process(delta: float) -> void:
 func squish(strength := 1.0) -> void:
 	if gone:
 		return
-	sprite.scale = REST_SCALE.lerp(Vector2(1.5, 0.2), strength)
+	sprite.scale = REST_SCALE.lerp(FLAT_SCALE, strength)
 	var t := create_tween()
 	t.tween_property(sprite, "scale", REST_SCALE, 0.35).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
 
