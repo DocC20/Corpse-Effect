@@ -1,0 +1,334 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://character_body_2d.gd" id="1_ply"]
+[ext_resource type="Texture2D" path="res://assets/player/cloak_orange.png" id="2_tex"]
+[ext_resource type="Script" path="res://spikes.gd" id="3_spk"]
+[ext_resource type="Script" path="res://goal.gd" id="4_goal"]
+[ext_resource type="Script" path="res://checkpoint.gd" id="5_chk"]
+[ext_resource type="Script" path="res://prompt.gd" id="6_prm"]
+[ext_resource type="Script" path="res://ui.gd" id="7_ui"]
+[ext_resource type="Script" path="res://atmosphere.gd" id="8_atm"]
+[ext_resource type="Script" path="res://camera_follow.gd" id="9_cam"]
+[ext_resource type="Script" path="res://dash_shrine.gd" id="10_dsh"]
+
+[sub_resource type="RectangleShape2D" id="S1"]
+size = Vector2(100, 40)
+
+[sub_resource type="RectangleShape2D" id="S2"]
+size = Vector2(110, 44)
+
+[sub_resource type="RectangleShape2D" id="S3"]
+size = Vector2(60, 78)
+
+[sub_resource type="RectangleShape2D" id="S4"]
+size = Vector2(60, 10)
+
+[sub_resource type="RectangleShape2D" id="S5"]
+size = Vector2(60, 106)
+
+[sub_resource type="RectangleShape2D" id="S6"]
+size = Vector2(90, 70)
+
+[sub_resource type="RectangleShape2D" id="S7"]
+size = Vector2(72, 20)
+
+[sub_resource type="RectangleShape2D" id="S8"]
+size = Vector2(72, 14)
+
+[sub_resource type="RectangleShape2D" id="S9"]
+size = Vector2(108, 76)
+
+[sub_resource type="RectangleShape2D" id="S10"]
+size = Vector2(10, 20)
+
+[sub_resource type="RectangleShape2D" id="S11"]
+size = Vector2(10, 20)
+
+[sub_resource type="RectangleShape2D" id="S12"]
+size = Vector2(12, 24)
+
+[sub_resource type="RectangleShape2D" id="S13"]
+size = Vector2(78, 40)
+
+[sub_resource type="RectangleShape2D" id="S14"]
+size = Vector2(58, 40)
+
+[sub_resource type="RectangleShape2D" id="S15"]
+size = Vector2(70, 40)
+
+[sub_resource type="RectangleShape2D" id="S16"]
+size = Vector2(10, 220)
+
+[sub_resource type="RectangleShape2D" id="S17"]
+size = Vector2(10, 220)
+
+[sub_resource type="RectangleShape2D" id="S18"]
+size = Vector2(12, 17)
+
+[node name="Level5" type="Node2D"]
+
+[node name="Start" type="StaticBody2D" parent="."]
+position = Vector2(50, 160)
+
+[node name="ColorRect" type="ColorRect" parent="Start"]
+offset_left = -50
+offset_top = -20
+offset_right = 50
+offset_bottom = 20
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Start"]
+shape = SubResource("S1")
+
+[node name="LedgeB" type="StaticBody2D" parent="."]
+position = Vector2(225, 158)
+
+[node name="ColorRect" type="ColorRect" parent="LedgeB"]
+offset_left = -55
+offset_top = -22
+offset_right = 55
+offset_bottom = 22
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LedgeB"]
+shape = SubResource("S2")
+
+[node name="RootCeiling" type="StaticBody2D" parent="."]
+position = Vector2(220, 19)
+
+[node name="ColorRect" type="ColorRect" parent="RootCeiling"]
+offset_left = -30
+offset_top = -39
+offset_right = 30
+offset_bottom = 39
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RootCeiling"]
+shape = SubResource("S3")
+
+[node name="Hazard" type="Polygon2D" parent="RootCeiling"]
+color = Color(0.85, 0.28, 0.35, 1)
+polygon = PackedVector2Array(-30, 37, -30, 39, -28, 47, -26, 39, -24, 47, -22, 39, -20, 47, -18, 39, -16, 47, -14, 39, -12, 47, -10, 39, -8, 47, -6, 39, -4, 47, -2, 39, 0, 47, 2, 39, 4, 47, 6, 39, 8, 47, 10, 39, 12, 47, 14, 39, 16, 47, 18, 39, 20, 47, 22, 39, 24, 47, 26, 39, 28, 47, 30, 39, 30, 37)
+
+[node name="RootCeilingHazard" type="Area2D" parent="."]
+position = Vector2(220, 63)
+script = ExtResource("3_spk")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RootCeilingHazard"]
+shape = SubResource("S4")
+
+[node name="CliffC" type="StaticBody2D" parent="."]
+position = Vector2(310, 127)
+
+[node name="ColorRect" type="ColorRect" parent="CliffC"]
+offset_left = -30
+offset_top = -53
+offset_right = 30
+offset_bottom = 53
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CliffC"]
+shape = SubResource("S5")
+
+[node name="TerraceD" type="StaticBody2D" parent="."]
+position = Vector2(415, 145)
+
+[node name="ColorRect" type="ColorRect" parent="TerraceD"]
+offset_left = -45
+offset_top = -35
+offset_right = 45
+offset_bottom = 35
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TerraceD"]
+shape = SubResource("S6")
+
+[node name="PitE" type="StaticBody2D" parent="."]
+position = Vector2(496, 170)
+
+[node name="ColorRect" type="ColorRect" parent="PitE"]
+offset_left = -36
+offset_top = -10
+offset_right = 36
+offset_bottom = 10
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PitE"]
+shape = SubResource("S7")
+
+[node name="SpikeVisualE" type="Polygon2D" parent="."]
+color = Color(0.85, 0.28, 0.35, 1)
+polygon = PackedVector2Array(460, 170, 460, 168, 465, 160, 470, 168, 475, 160, 480, 168, 485, 160, 490, 168, 495, 160, 500, 168, 505, 160, 510, 168, 515, 160, 520, 168, 525, 160, 530, 168, 535, 160, 532, 168, 532, 170)
+
+[node name="SpikesE" type="Area2D" parent="."]
+position = Vector2(496, 163)
+script = ExtResource("3_spk")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SpikesE"]
+shape = SubResource("S8")
+
+[node name="SummitF" type="StaticBody2D" parent="."]
+position = Vector2(586, 142)
+
+[node name="ColorRect" type="ColorRect" parent="SummitF"]
+offset_left = -54
+offset_top = -38
+offset_right = 54
+offset_bottom = 38
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SummitF"]
+shape = SubResource("S9")
+
+[node name="CheckpointB" type="Area2D" parent="."]
+position = Vector2(180, 120)
+script = ExtResource("5_chk")
+
+[node name="ColorRect" type="ColorRect" parent="CheckpointB"]
+offset_left = -2.0
+offset_top = 10.0
+offset_right = 2.0
+offset_bottom = 16.0
+color = Color(0.3, 0.4, 0.55, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CheckpointB"]
+position = Vector2(0, 6)
+shape = SubResource("S10")
+
+[node name="CheckpointD" type="Area2D" parent="."]
+position = Vector2(384, 94)
+script = ExtResource("5_chk")
+
+[node name="ColorRect" type="ColorRect" parent="CheckpointD"]
+offset_left = -2.0
+offset_top = 10.0
+offset_right = 2.0
+offset_bottom = 16.0
+color = Color(0.3, 0.4, 0.55, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CheckpointD"]
+position = Vector2(0, 6)
+shape = SubResource("S11")
+
+[node name="WallLeft" type="StaticBody2D" parent="."]
+position = Vector2(-5, 90)
+
+[node name="ColorRect" type="ColorRect" parent="WallLeft"]
+offset_left = -5
+offset_top = -110
+offset_right = 5
+offset_bottom = 110
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallLeft"]
+shape = SubResource("S16")
+
+[node name="WallRight" type="StaticBody2D" parent="."]
+position = Vector2(645, 90)
+
+[node name="ColorRect" type="ColorRect" parent="WallRight"]
+offset_left = -5
+offset_top = -110
+offset_right = 5
+offset_bottom = 110
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallRight"]
+shape = SubResource("S17")
+
+[node name="Goal" type="Area2D" parent="."]
+position = Vector2(615, 92)
+script = ExtResource("4_goal")
+next_scene = "res://level6.tscn"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Goal"]
+shape = SubResource("S12")
+
+[node name="CharacterBody2D" type="CharacterBody2D" parent="."]
+position = Vector2(24, 124)
+script = ExtResource("1_ply")
+
+[node name="Sprite2D" type="Sprite2D" parent="CharacterBody2D"]
+texture = ExtResource("2_tex")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CharacterBody2D"]
+position = Vector2(0, 7.5)
+shape = SubResource("S18")
+
+[node name="Atmosphere" type="Node2D" parent="."]
+script = ExtResource("8_atm")
+progress_from = 20.0
+progress_to = 620
+level_size = Vector2(640, 180)
+mood_start = 0.72
+mood_end = 0.76
+ground_style = "hills"
+realism = 0.1
+fx = 0.9
+level_number = 5
+
+[node name="TextLayer" type="CanvasLayer" parent="." groups=["text_layer"]]
+layer = 3
+follow_viewport_enabled = true
+
+[node name="HUD" type="CanvasLayer" parent="."]
+layer = 4
+
+[node name="Prompts" type="Node2D" parent="."]
+
+[node name="Chasm" type="Area2D" parent="Prompts"]
+position = Vector2(59, 120)
+script = ExtResource("6_prm")
+text = "No floor below.\nNothing would stay down there."
+alt_text = "Leave yourself at the edge.\nThen leap from it."
+label_pos = Vector2(70, 84)
+dismiss_x = 172
+italic = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Prompts/Chasm"]
+shape = SubResource("S13")
+
+[node name="Roots" type="Area2D" parent="Prompts"]
+position = Vector2(201, 116)
+script = ExtResource("6_prm")
+text = "Not every way up is safe."
+label_pos = Vector2(215, 70)
+dismiss_x = 282
+italic = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Prompts/Roots"]
+shape = SubResource("S14")
+
+[node name="Last" type="Area2D" parent="Prompts"]
+position = Vector2(415, 90)
+script = ExtResource("6_prm")
+text = "Almost at the top."
+label_pos = Vector2(420, 60)
+dismiss_x = 535
+italic = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Prompts/Last"]
+shape = SubResource("S15")
+
+[node name="UI" type="Node" parent="."]
+script = ExtResource("7_ui")
+
+[node name="Camera" type="Camera2D" parent="."]
+position = Vector2(160, 90)
+script = ExtResource("9_cam")
+bounds = Rect2(0, 0, 640, 180)
+
+[node name="DeathLabel" type="Label" parent="HUD" groups=["death_label"]]
+offset_left = 240.0
+offset_top = 4.0
+offset_right = 316.0
+offset_bottom = 16.0
+horizontal_alignment = 2
+text = "DEATHS: 0"
+
+[node name="MsgLabel" type="Label" parent="HUD" groups=["msg_label"]]
+offset_left = 40.0
+offset_top = 34.0
+offset_right = 280.0
+offset_bottom = 74.0
+horizontal_alignment = 1

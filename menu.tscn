@@ -1,0 +1,35 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://menu.gd" id="1_menu"]
+[ext_resource type="Script" path="res://atmosphere.gd" id="2_atm"]
+[ext_resource type="Script" path="res://ui.gd" id="3_ui"]
+
+[sub_resource type="RectangleShape2D" id="S_ground"]
+size = Vector2(340, 40)
+
+[node name="Menu" type="Node2D"]
+script = ExtResource("1_menu")
+
+[node name="Ground" type="StaticBody2D" parent="."]
+position = Vector2(160, 160)
+
+[node name="ColorRect" type="ColorRect" parent="Ground"]
+offset_left = -170.0
+offset_top = -20.0
+offset_right = 170.0
+offset_bottom = 20.0
+color = Color(0.24, 0.32, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground"]
+shape = SubResource("S_ground")
+
+[node name="Atmosphere" type="Node2D" parent="."]
+script = ExtResource("2_atm")
+mood_start = 0.0
+mood_end = 0.0
+fx = 0.6
+trees = Array[Vector2]([Vector2(266, 141)])
+
+[node name="UI" type="Node" parent="."]
+script = ExtResource("3_ui")
+allow_pause = false
